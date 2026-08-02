@@ -1,0 +1,17 @@
+node_modules/
+
+dist/
+
+.env
+
+coverage/
+
+logs/
+
+uploads/
+
+npm-debug.log
+
+yarn-error.log
+
+.DS_Store
