@@ -12,13 +12,20 @@ CREATE TABLE `usuario` (
   `id_usuario` int NOT NULL AUTO_INCREMENT,
   `nombre` varchar(100) NOT NULL,
   `apellido` varchar(100) NOT NULL,
+  `cedula` varchar(10) DEFAULT NULL,
   `correo` varchar(100) NOT NULL,
   `contrasena` varchar(255) NOT NULL,
   `rol` enum('ESTUDIANTE','ADMINISTRADOR') NOT NULL,
   `fecha_registro` datetime DEFAULT CURRENT_TIMESTAMP,
-  `estado` enum('ACTIVO','INACTIVO') NOT NULL DEFAULT 'ACTIVO',
+  `estado` enum('ACTIVO','INACTIVO','BANEADO') NOT NULL DEFAULT 'ACTIVO',
+  `motivo_baneo` varchar(255) DEFAULT NULL,
+  `fecha_baneo` datetime DEFAULT NULL,
+  `baneado_por` int DEFAULT NULL,
   PRIMARY KEY (`id_usuario`),
-  UNIQUE KEY `correo` (`correo`)
+  UNIQUE KEY `correo` (`correo`),
+  UNIQUE KEY `uq_usuario_cedula` (`cedula`),
+  KEY `fk_usuario_baneado_por` (`baneado_por`),
+  CONSTRAINT `usuario_fk_baneado_por` FOREIGN KEY (`baneado_por`) REFERENCES `usuario` (`id_usuario`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
@@ -206,6 +213,26 @@ CREATE TABLE `servicioemergencia` (
   PRIMARY KEY (`id_servicio`),
   KEY `id_ubicacion` (`id_ubicacion`),
   CONSTRAINT `servicioemergencia_ibfk_1` FOREIGN KEY (`id_ubicacion`) REFERENCES `ubicacion` (`id_ubicacion`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- ----------------------------
+-- Table: notificacion_admin
+-- ----------------------------
+DROP TABLE IF EXISTS `notificacion_admin`;
+CREATE TABLE `notificacion_admin` (
+  `id_notificacion` INT NOT NULL AUTO_INCREMENT,
+  `tipo` ENUM('REPORTE_NUEVO','SOS_ACTIVADO','USUARIO_NUEVO') NOT NULL,
+  `titulo` VARCHAR(150) NOT NULL,
+  `detalle` VARCHAR(255) DEFAULT NULL,
+  `id_reporte` INT DEFAULT NULL,
+  `id_usuario` INT DEFAULT NULL,
+  `leida` TINYINT(1) NOT NULL DEFAULT 0,
+  `fecha` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_notificacion`),
+  KEY `idx_notif_leida` (`leida`, `fecha`),
+  KEY `idx_notif_reporte` (`id_reporte`),
+  CONSTRAINT `notif_fk_reporte` FOREIGN KEY (`id_reporte`) REFERENCES `reporte` (`id_reporte`) ON DELETE CASCADE,
+  CONSTRAINT `notif_fk_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
